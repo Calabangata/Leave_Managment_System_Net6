@@ -8,17 +8,20 @@ using Microsoft.EntityFrameworkCore;
 using LeaveManagmentSystem.Web.Data;
 using AutoMapper;
 using LeaveManagmentSystem.Web.Models;
+using LeaveManagmentSystem.Web.Contracts;
 
 namespace LeaveManagmentSystem.Web.Controllers
 {
     public class LeaveTypesController : Controller
     {
-        private readonly ApplicationDbContext _context;//database connection
+        
+        private readonly ILeaveTypeRepository leaveTypeRepository;
         private readonly IMapper mapper;
 
-        public LeaveTypesController(ApplicationDbContext context, IMapper mapper)
+        public LeaveTypesController(ILeaveTypeRepository leaveTypeRepository, IMapper mapper)
         {
-            _context = context;
+            
+            this.leaveTypeRepository = leaveTypeRepository;
             this.mapper = mapper;
         }
 
@@ -26,30 +29,18 @@ namespace LeaveManagmentSystem.Web.Controllers
         //select * from leavetypes
         public async Task<IActionResult> Index()
         {
-            if(_context.LeaveTypes != null)
-            {
-                var leaveTypes = mapper.Map<List<LeaveTypeVM>>(await _context.LeaveTypes.ToListAsync());
+                
+                var leaveTypes = mapper.Map<List<LeaveTypeVM>>(await leaveTypeRepository.GetAllAsync());
                 return View(leaveTypes);
 
-            } else
-                {
-                    return Problem("Entity set 'ApplicationDbContext.LeaveTypes'  is null.");
-                }
-            //return _context.LeaveTypes != null ?
-            //            View(await _context.LeaveTypes.ToListAsync()) :
-            //            Problem("Entity set 'ApplicationDbContext.LeaveTypes'  is null.");
+           
         }
 
         // GET: LeaveTypes/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.LeaveTypes == null)
-            {
-                return NotFound();
-            }
-
-            var leaveType = await _context.LeaveTypes
-                .FirstOrDefaultAsync(m => m.Id == id);
+            
+            var leaveType = await leaveTypeRepository.GetAsync(id);
             if (leaveType == null)
             {
                 return NotFound();
@@ -75,8 +66,8 @@ namespace LeaveManagmentSystem.Web.Controllers
             if (ModelState.IsValid)
             {
                 var leaveType = mapper.Map<LeaveType>(leaveTypeVM);
-                _context.Add(leaveType);
-                await _context.SaveChangesAsync();
+
+                await leaveTypeRepository.AddAsync(leaveType);
                 return RedirectToAction(nameof(Index));
             }
             return View(leaveTypeVM);
@@ -85,18 +76,13 @@ namespace LeaveManagmentSystem.Web.Controllers
         // GET: LeaveTypes/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.LeaveTypes == null)
-            {
-                return NotFound();
-            }
-
-            var leaveType = await _context.LeaveTypes.FindAsync(id);
+            var leaveType = await leaveTypeRepository.GetAsync(id);
             if (leaveType == null)
             {
                 return NotFound();
             }
 
-			var leaveTypeVM = mapper.Map<LeaveTypeVM>(leaveType);
+            var leaveTypeVM = mapper.Map<LeaveTypeVM>(leaveType);
 			return View(leaveTypeVM);
         }
 
@@ -117,12 +103,11 @@ namespace LeaveManagmentSystem.Web.Controllers
                 try
                 {
 					var leaveType = mapper.Map<LeaveType>(leaveTypeVM);
-					_context.Update(leaveType);
-                    await _context.SaveChangesAsync();
+					await leaveTypeRepository.UpdateAsync(leaveType);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!LeaveTypeExists(leaveTypeVM.Id))
+                    if (!await leaveTypeRepository.Exists(leaveTypeVM.Id))
                     {
                         return NotFound();
                     }
@@ -137,45 +122,35 @@ namespace LeaveManagmentSystem.Web.Controllers
         }
 
         // GET: LeaveTypes/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.LeaveTypes == null)
-            {
-                return NotFound();
-            }
+        //public async Task<IActionResult> Delete(int? id)
+        //{
+        //    if (id == null || _context.LeaveTypes == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var leaveType = await _context.LeaveTypes
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (leaveType == null)
-            {
-                return NotFound();
-            }
+        //    var leaveType = await _context.LeaveTypes
+        //        .FirstOrDefaultAsync(m => m.Id == id);
+        //    if (leaveType == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return View(leaveType);
-        }
+        //    return View(leaveType);
+        //}
 
         // POST: LeaveTypes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.LeaveTypes == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.LeaveTypes'  is null.");
-            }
-            var leaveType = await _context.LeaveTypes.FindAsync(id);
-            if (leaveType != null)
-            {
-                _context.LeaveTypes.Remove(leaveType);
-            }
-            
-            await _context.SaveChangesAsync();
+            await leaveTypeRepository.DeleteAsync(id);
             return RedirectToAction(nameof(Index));
         }
 
-        private bool LeaveTypeExists(int id)
-        {
-          return (_context.LeaveTypes?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
+        //private async bool LeaveTypeExists(int id)
+        //{
+        //  return await leaveTypeRepository.Exists(id);
+        //}
     }
 }
