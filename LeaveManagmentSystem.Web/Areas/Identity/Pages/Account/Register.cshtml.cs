@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using LeaveManagmentSystem.Web.Constants;
 
 namespace LeaveManagmentSystem.Web.Areas.Identity.Pages.Account
 {
@@ -90,11 +91,11 @@ namespace LeaveManagmentSystem.Web.Areas.Identity.Pages.Account
 
             [DataType(DataType.Date)]
             [Display(Name = "Date of Birth")]
-            public DateTime DateOfBirth { get; set; }
+            public DateTime? DateOfBirth { get; set; }
 
             [DataType(DataType.Date)]
             [Display(Name = "Date of Joining")]
-            public DateTime DateJoined { get; set; }
+            public DateTime? DateJoined { get; set; }
 
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -135,8 +136,8 @@ namespace LeaveManagmentSystem.Web.Areas.Identity.Pages.Account
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 user.FirstName = Input.Firstname;
                 user.LastName = Input.Lastname;
-                user.DateOfBirth = Input.DateOfBirth;
-                user.DateJoined = Input.DateJoined;
+                user.DateOfBirth = Input.DateOfBirth ?? default;
+                user.DateJoined = Input.DateJoined ?? default;
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
@@ -144,6 +145,7 @@ namespace LeaveManagmentSystem.Web.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
+                    await _userManager.AddToRoleAsync(user, Roles.User);
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
