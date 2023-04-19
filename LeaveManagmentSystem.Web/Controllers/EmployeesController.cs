@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using LeaveManagmentSystem.Web.Constants;
+using LeaveManagmentSystem.Web.Contracts;
 using LeaveManagmentSystem.Web.Data;
 using LeaveManagmentSystem.Web.Models;
 using Microsoft.AspNetCore.Http;
@@ -12,11 +13,13 @@ namespace LeaveManagmentSystem.Web.Controllers
     {
         private readonly UserManager<Employee> userManager;
         private readonly IMapper mapper;
+        private readonly ILeaveAllocationRepository leaveAllocationRepository;
 
-        public EmployeesController(UserManager<Employee> userManager, IMapper mapper)
+        public EmployeesController(UserManager<Employee> userManager, IMapper mapper, ILeaveAllocationRepository leaveAllocationRepository)
         {
             this.userManager = userManager;
             this.mapper = mapper;
+            this.leaveAllocationRepository = leaveAllocationRepository;
         }
         // GET: EmployeesController
         public async Task<IActionResult> Index()
@@ -26,10 +29,11 @@ namespace LeaveManagmentSystem.Web.Controllers
             return View(employeeListVM);
         }
 
-        // GET: EmployeesController/ViewAllocations/5
-        public ActionResult ViewAllocations(int id)
+        // GET: EmployeesController/ViewAllocations/employeeId
+        public async Task<IActionResult> ViewAllocations(string id)
         {
-            return View();
+            var model = await leaveAllocationRepository.GetEmployeeAllocations(id);
+            return View(model);
         }
 
         // GET: EmployeesController/Create
@@ -53,16 +57,21 @@ namespace LeaveManagmentSystem.Web.Controllers
             }
         }
 
-        // GET: EmployeesController/Edit/5
-        public ActionResult Edit(int id)
+        // GET: EmployeesController/EditAllocation/5
+        public async Task<IActionResult> EditAllocation(int id)
         {
-            return View();
+            var model = await leaveAllocationRepository.GetEmpAllocation(id);
+            if (model == null)
+            {
+                return NotFound();
+            }
+            return View(model);
         }
 
-        // POST: EmployeesController/Edit/5
+        // POST: EmployeesController/EditAllocation/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult EditAllocation(int id, IFormCollection collection)
         {
             try
             {
