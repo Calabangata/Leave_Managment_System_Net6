@@ -6,5 +6,8 @@ namespace LeaveManagmentSystem.Web.Contracts
     public interface ILeaveRequestRepository : IGenericRepository<LeaveRequest>
     {
         Task CreateLeaveRequest(LeaveRequestCreateVM model);
+
+        Task<EmployeeLeaveRequestsVM> GetMyLeaveDetails();
+        Task<List<LeaveRequest>> GetAllAsync(string employeeId);
     }
 }

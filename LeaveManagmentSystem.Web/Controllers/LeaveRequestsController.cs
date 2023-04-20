@@ -51,6 +51,12 @@ namespace LeaveManagmentSystem.Web.Controllers
             return View(leaveRequest);
         }
 
+        public async Task<ActionResult> MyLeave()
+        {
+            var model = await leaveRequestRepository.GetMyLeaveDetails();
+            return View(model);
+        }
+
         // GET: LeaveRequests/Create
         public IActionResult Create()
         {
