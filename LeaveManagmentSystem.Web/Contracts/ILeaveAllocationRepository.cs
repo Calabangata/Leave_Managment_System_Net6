@@ -9,6 +9,7 @@ namespace LeaveManagmentSystem.Web.Contracts
 
         Task<bool> AllocationExists(string employeeId, int leaveTypeId, int period);
         Task<EmployeeAllocationVM> GetEmployeeAllocations(string employeeId);
+        Task<LeaveAllocation?> GetEmployeeAllocation(string employeeId, int leaveTypeId);
         Task<LeaveAllocationEditVM> GetEmpAllocation(int id);
         Task<bool> UpdateEmpAllocation(LeaveAllocationEditVM model);
     }

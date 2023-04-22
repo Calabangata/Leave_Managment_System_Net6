@@ -26,6 +26,22 @@ namespace LeaveManagmentSystem.Web.Repositories
             this.leaveAllocationRepository = leaveAllocationRepository;
         }
 
+        public async Task ChangeApprovalStatus(int leaveRequestId, bool approved)
+        {
+            var leaveRequest = await GetAsync(leaveRequestId);
+            leaveRequest.Approved = approved;
+
+            if (approved)
+            {
+                var allocation = await leaveAllocationRepository.GetEmployeeAllocation(leaveRequest.RequestingEmployeeId, leaveRequest.LeaveTypeId);
+                int daysRequested = (int)(leaveRequest.EndDate - leaveRequest.StartDate).TotalDays;
+                allocation.NumberOfDays -= daysRequested;
+
+                await leaveAllocationRepository.UpdateAsync(allocation);
+            }
+            await UpdateAsync(leaveRequest);
+        }
+
         public async Task CreateLeaveRequest(LeaveRequestCreateVM model)
         {
             var user = await userManager.GetUserAsync(httpContextAccesor?.HttpContext?.User);
@@ -61,7 +77,19 @@ namespace LeaveManagmentSystem.Web.Repositories
             return await context.LeaveRequests.Where(q => q.RequestingEmployeeId == employeeId).ToListAsync();
         }
 
-        public async Task<EmployeeLeaveRequestsVM> GetMyLeaveDetails()
+		public async Task<LeaveRequestVM?> GetLeaveRequestAsync(int? id)
+		{
+			var leaveRequest = await context.LeaveRequests.Include(q => q.LeaveType).FirstOrDefaultAsync(q => q.Id == id);
+            if(leaveRequest == null)
+            {
+                return null;
+            }
+            var model = mapper.Map<LeaveRequestVM>(leaveRequest);
+            model.Employee = mapper.Map<EmployeeListVM>(await userManager.FindByIdAsync(leaveRequest?.RequestingEmployeeId));
+            return model;
+		}
+
+		public async Task<EmployeeLeaveRequestsVM> GetMyLeaveDetails()
         {
             var user = await userManager.GetUserAsync(httpContextAccesor?.HttpContext?.User);
             var allocations = (await leaveAllocationRepository.GetEmployeeAllocations(user.Id)).LeaveAllocations;
