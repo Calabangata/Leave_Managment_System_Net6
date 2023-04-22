@@ -46,8 +46,8 @@ namespace LeaveManagmentSystem.Web.Controllers
             return View(model);
         }
 
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Cancel(int id)
         {
             try
