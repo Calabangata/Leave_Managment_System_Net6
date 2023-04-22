@@ -5,12 +5,13 @@ namespace LeaveManagmentSystem.Web.Contracts
 {
     public interface ILeaveRequestRepository : IGenericRepository<LeaveRequest>
     {
-        Task CreateLeaveRequest(LeaveRequestCreateVM model);
+        Task<bool> CreateLeaveRequest(LeaveRequestCreateVM model);
 
         Task<EmployeeLeaveRequestsVM> GetMyLeaveDetails();
         Task<List<LeaveRequest>> GetAllAsync(string employeeId);
         Task<AdminViewLeaveRequestsVM> GetAdminViewLeaveRequestsList();
         Task ChangeApprovalStatus(int leaveRequestId, bool approved);
         Task<LeaveRequestVM?> GetLeaveRequestAsync(int? id);
+        Task CancelLeaveRequest(int leaveRequestId);
     }
 }

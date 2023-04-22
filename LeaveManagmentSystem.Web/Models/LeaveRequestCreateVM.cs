@@ -16,6 +16,7 @@ namespace LeaveManagmentSystem.Web.Models
         public DateTime? EndDate { get; set; }
 
         [Required]
+        [Display(Name = "Leave Types")]
         public int LeaveTypeId { get; set; }
         public SelectList? LeaveTypes { get; set; }
 
