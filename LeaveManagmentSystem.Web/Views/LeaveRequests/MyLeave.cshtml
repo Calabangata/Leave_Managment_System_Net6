@@ -107,15 +107,15 @@
                 
                 
                 <td>
-                    @*@if(item.Approved == null)
+                    @if(item.Approved == null && item.Cancelled == false)
                     {
                         <form asp-action="Cancel">
-                            <input name="Id" asp-form="@item.Id" type="hidden" />
+                            <input name="Id" value="@item.Id" type="hidden" />
                             <button type="submit" class="btn btn-danger btn-sm">Cancel Request</button>
                         </form>
-                    }*@
+                    }
 
-                    <a asp-action="Cancel" class="btn btn-danger btn-sm" asp-route-id="@item.Id">Cancel Request</a>
+                    @*<a asp-action="Cancel" class="btn btn-danger btn-sm" asp-route-id="@item.Id">Cancel Request</a>*@
 
                 </td>
             </tr>
