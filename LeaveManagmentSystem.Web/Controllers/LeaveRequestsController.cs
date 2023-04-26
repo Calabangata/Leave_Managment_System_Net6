@@ -19,17 +19,21 @@ namespace LeaveManagmentSystem.Web.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILeaveRequestRepository leaveRequestRepository;
+        private readonly ILogger<LeaveRequestsController> logger;
 
-        public LeaveRequestsController(ApplicationDbContext context, ILeaveRequestRepository leaveRequestRepository)
+        public LeaveRequestsController(ApplicationDbContext context, ILeaveRequestRepository leaveRequestRepository,
+            ILogger<LeaveRequestsController> logger)
         {
             _context = context;
             this.leaveRequestRepository = leaveRequestRepository;
+            this.logger = logger;
         }
 
         [Authorize(Roles = Roles.Administrator)]
         // GET: LeaveRequests
         public async Task<IActionResult> Index()
         {
+            
             var model = await leaveRequestRepository.GetAdminViewLeaveRequestsList();
             return View(model);
         }
@@ -56,7 +60,7 @@ namespace LeaveManagmentSystem.Web.Controllers
             }
             catch (Exception e)
             {
-
+                logger.LogError(e, "Error Cancelling Request");
                 throw;
             }
             return RedirectToAction(nameof(MyLeave));
@@ -72,7 +76,7 @@ namespace LeaveManagmentSystem.Web.Controllers
             }
             catch (Exception e)
             {
-
+                logger.LogError(e, "Error Approving Request");
                 throw;
             }
             return RedirectToAction(nameof(Index));
